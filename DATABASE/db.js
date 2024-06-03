@@ -1,24 +1,12 @@
-const mysql = require('mysql');
-require('dotenv').config();
+const sqlite3 = require('sqlite3').verbose();
 
-if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASS || !process.env.DB_NAME) {
-  console.error('Environment variables not set. Exiting...');
-  process.exit(1);
-}
-
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME
-});
-
-db.connect(err => {
+// Create a new database file or open it if it already exists
+const db = new sqlite3.Database('./cranecorp.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
   if (err) {
-    console.error('Failed to connect to MySQL:', err);
-    process.exit(1);
+    console.error(err.message);
+  } else {
+    console.log('Connected to the cranecorp.db database.');
   }
-  console.log('MySQL connected...');
 });
 
 module.exports = db;
