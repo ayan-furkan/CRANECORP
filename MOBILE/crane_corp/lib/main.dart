@@ -51,32 +51,45 @@ class _MyHomePageState extends State<MyHomePage> {
   String serverIp = '';
   String serverIp2 = '';
   String serverIp3 = '';
+  int port1 = 8080;
+  int port2 = 8080;
+  int port3 = 3000;
 
   @override
   void initState() {
     super.initState();
     _loadSavedData();
-    _loadIp();
+    _loadIpAndPorts();
   }
 
-  Future<void> _loadIp() async {
+  Future<void> _loadIpAndPorts() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       serverIp = prefs.getString('server_ip') ?? '';
       serverIp2 = prefs.getString('server_ip2') ?? '';
       serverIp3 = prefs.getString('server_ip3') ?? '';
+      port1 = prefs.getInt('port1') ?? 8080;
+      port2 = prefs.getInt('port2') ?? 8080;
+      port3 = prefs.getInt('port3') ?? 3000;
     });
   }
 
-  Future<void> _saveIp(String ip, String ip2, String ip3) async {
+  Future<void> _saveIpAndPorts(String ip, String ip2, String ip3, int port1,
+      int port2, int port3) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('server_ip', ip);
     await prefs.setString('server_ip2', ip2);
     await prefs.setString('server_ip3', ip3);
+    await prefs.setInt('port1', port1);
+    await prefs.setInt('port2', port2);
+    await prefs.setInt('port3', port3);
     setState(() {
       serverIp = ip;
       serverIp2 = ip2;
       serverIp3 = ip3;
+      this.port1 = port1;
+      this.port2 = port2;
+      this.port3 = port3;
     });
   }
 
@@ -250,7 +263,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _sendAddContainerQuery(
       String containerName, int x, int y) async {
-    final url3 = Uri.parse('http://$serverIp3:3000/query');
+    final url3 = Uri.parse('http://$serverIp3:$port3/query');
     print('Sending add container query to URL3: $containerName, $x, $y');
 
     try {
@@ -279,7 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _sendDeleteContainerQuery(int x, int y) async {
-    final url3 = Uri.parse('http://$serverIp3:3000/query');
+    final url3 = Uri.parse('http://$serverIp3:$port3/query');
     print('Sending delete container query to URL3: $x, $y');
 
     try {
@@ -309,7 +322,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _sendCoordinates2(
       String pickupX, String pickupY, String dropX, String dropY) async {
-    final url2 = Uri.parse('http://$serverIp2:8080/move');
+    final url2 = Uri.parse('http://$serverIp2:$port2/move');
     print('Sending coordinates to URL2: $pickupX, $pickupY to $dropX, $dropY');
 
     try {
@@ -340,7 +353,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _sendAddContainerSimulation(int X, int Y) async {
-    final url2 = Uri.parse('http://$serverIp2:8080/add');
+    final url2 = Uri.parse('http://$serverIp2:$port2/add');
     print('Sending coordinates to URL2: $X, $Y');
 
     try {
@@ -369,7 +382,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _sendDeleteContainerSimulation(int X, int Y) async {
-    final url2 = Uri.parse('http://$serverIp2:8080/remove');
+    final url2 = Uri.parse('http://$serverIp2:$port2/remove');
     print('AAA Sending coordinates to URL2: $X, $Y');
 
     try {
@@ -400,7 +413,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _sendCoordinates3(
       String pickupX, String pickupY, String dropX, String dropY) async {
-    final url3 = Uri.parse('http://$serverIp3:3000/query');
+    final url3 = Uri.parse('http://$serverIp3:$port3/query');
     print('Sending coordinates to URL3: $pickupX, $pickupY to $dropX, $dropY');
 
     try {
@@ -434,7 +447,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await _sendCoordinates2(pickupX, pickupY, dropX, dropY);
     await _sendCoordinates3(pickupX, pickupY, dropX, dropY);
 
-    final url1 = Uri.parse('http://$serverIp:8080/move');
+    final url1 = Uri.parse('http://$serverIp:$port1/move');
     print('Sending coordinates: $pickupX, $pickupY to $dropX, $dropY');
 
     try {
@@ -468,7 +481,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _fetchDataAndUpdateGrid() async {
-    final url3 = Uri.parse('http://$serverIp3:3000/query');
+    final url3 = Uri.parse('http://$serverIp3:$port3/query');
 
     setState(() {
       _isLoading = true;
@@ -929,6 +942,12 @@ class _MyHomePageState extends State<MyHomePage> {
         TextEditingController(text: serverIp2);
     final TextEditingController ipController3 =
         TextEditingController(text: serverIp3);
+    final TextEditingController port1Controller =
+        TextEditingController(text: port1.toString());
+    final TextEditingController port2Controller =
+        TextEditingController(text: port2.toString());
+    final TextEditingController port3Controller =
+        TextEditingController(text: port3.toString());
 
     showModalBottomSheet(
       context: context,
@@ -942,20 +961,68 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  _buildTextField(
-                      controller: ipController, label: 'Server IP Address 1'),
-                  _buildTextField(
-                      controller: ipController2, label: 'Server IP Address 2'),
-                  _buildTextField(
-                      controller: ipController3, label: 'Server IP Address 3'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                            controller: ipController,
+                            label: 'Embedded IP Address'),
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: _buildTextField(
+                            controller: port1Controller,
+                            label: 'Embedded Port Number',
+                            isNumeric: true),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                            controller: ipController2,
+                            label: 'Simulation IP Address'),
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: _buildTextField(
+                            controller: port2Controller,
+                            label: 'Simulation Port Number',
+                            isNumeric: true),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                            controller: ipController3,
+                            label: 'Database IP Address'),
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: _buildTextField(
+                            controller: port3Controller,
+                            label: 'Database Port Number',
+                            isNumeric: true),
+                      ),
+                    ],
+                  ),
                   SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          _saveIp(ipController.text, ipController2.text,
-                              ipController3.text);
+                          int port1 =
+                              int.tryParse(port1Controller.text) ?? 8080;
+                          int port2 =
+                              int.tryParse(port2Controller.text) ?? 8080;
+                          int port3 =
+                              int.tryParse(port3Controller.text) ?? 8080;
+                          _saveIpAndPorts(ipController.text, ipController2.text,
+                              ipController3.text, port1, port2, port3);
                           Navigator.of(context).pop();
                         },
                         child: Text(
