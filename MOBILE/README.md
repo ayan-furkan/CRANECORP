@@ -1,1 +1,1 @@
-Download apk from [here](https://raw.githubusercontent.com/ayan-furkan/CRANECORP/blob/main/MOBILE/portflow.apk)
+Download apk from [here](https://github.com/ayan-furkan/CRANECORP/blob/main/MOBILE/portflow.apk)
